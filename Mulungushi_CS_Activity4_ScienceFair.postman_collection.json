@@ -1,0 +1,154 @@
+{
+  "info": {
+    "_postman_id": "b3e9a4f2-9876-42d1-a1b2-998877665544",
+    "name": "Mulungushi University - ICT251 Activity 4 (Science Fair Projects API)",
+    "description": "REST API Collection for Mulungushi University School of Engineering & Technology, Computer Science Dept.\nStudent: Achizima Marvelous Mpashi (202511543)\nTheme: Question 13 — Science Fair Projects (/api/projects)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "created_project_id",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. GET /api/projects - List All Projects",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/projects",
+          "host": ["{{base_url}}"],
+          "path": ["api", "projects"]
+        },
+        "description": "Retrieves the array of all science fair project records stored in the database."
+      },
+      "response": []
+    },
+    {
+      "name": "2. GET /api/projects/:id - Get Project by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/projects/1",
+          "host": ["{{base_url}}"],
+          "path": ["api", "projects", "1"]
+        },
+        "description": "Retrieves the single project record with primary key id = 1."
+      },
+      "response": []
+    },
+    {
+      "name": "3. POST /api/projects - Create New Project",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData.data && jsonData.data.id) {",
+              "    pm.collectionVariables.set('created_project_id', jsonData.data.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"project_title\": \"Edge AI for Wildlife Poaching Interception in South Luangwa\",\n  \"student_name\": \"Achizima Marvelous Mpashi\",\n  \"category\": \"Computer Vision & Agriculture\",\n  \"score\": 99.2,\n  \"booth_number\": 120,\n  \"status\": \"Awarded 1st Place\",\n  \"abstract_text\": \"Solar-powered acoustic acoustic and thermal edge sensors running quantized MobileNetV4 models to detect illegal firearms and vehicle signatures in protected national reserves in sub-second inference time.\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/projects",
+          "host": ["{{base_url}}"],
+          "path": ["api", "projects"]
+        },
+        "description": "Inserts a new science fair project entry into the database and returns HTTP 201."
+      },
+      "response": []
+    },
+    {
+      "name": "4. PUT /api/projects/:id - Update Project",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"project_title\": \"Edge AI Wildlife Poaching Interception (Field Validated)\",\n  \"student_name\": \"Achizima Marvelous Mpashi\",\n  \"category\": \"Computer Vision & Agriculture\",\n  \"score\": 99.8,\n  \"booth_number\": 120,\n  \"status\": \"Awarded 1st Place\",\n  \"abstract_text\": \"Solar-powered acoustic and thermal edge sensors updated with real-world field validation metrics in South Luangwa National Park, achieving 99.1% precision on acoustic gunshot signatures.\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/projects/{{created_project_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "projects", "{{created_project_id}}"]
+        },
+        "description": "Updates the project record corresponding to the specified ID."
+      },
+      "response": []
+    },
+    {
+      "name": "5. DELETE /api/projects/:id - Delete Project",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/projects/{{created_project_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "projects", "{{created_project_id}}"]
+        },
+        "description": "Removes the project record with the specified ID."
+      },
+      "response": []
+    }
+  ]
+}

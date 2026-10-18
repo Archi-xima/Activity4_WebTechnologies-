@@ -1,0 +1,19 @@
+{
+  "name": "ict251-activity4-sciencefair",
+  "version": "1.0.0",
+  "description": "Mulungushi University ICT251 Activity 4 - Single-Table CRUD System",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "test": "node test_endpoints.js",
+    "dev": "node --watch backend/server.js"
+  },
+  "author": "Achizima Marvelous Mpashi (202511543)",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0",
+    "mysql2": "^3.24.6",
+    "sqlite3": "^6.0.1"
+  }
+}

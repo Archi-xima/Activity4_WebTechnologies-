@@ -1,0 +1,21 @@
+{
+  "name": "ict251-backend",
+  "version": "1.0.0",
+  "description": "Mulungushi University ICT251 Activity 4 - Single-Table CRUD REST API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node ../test_endpoints.js"
+  },
+  "author": "Achizima Marvelous Mpashi (202511543)",
+  "keywords": [],
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0",
+    "mysql2": "^3.24.6",
+    "sqlite3": "^6.0.1"
+  }
+}
