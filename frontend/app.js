@@ -12,13 +12,14 @@
  * ====================================================================
  */
 
-// Dynamically determine API Base URL:
-// 1. If loaded from web / cloud (Render, Vercel) or local express (http://localhost:3000), use relative '/api/projects'
-// 2. If loaded from VS Code Live Server (port 5500/5501), fallback to localhost:3000
-// 3. If opened via file:// protocol directly from disk, seamlessly connect to the live Render cloud deployment!
-const API_BASE_URL = (() => {
+// Resilient Dual-Connection Architecture:
+// Primary: Relative '/api/projects' when served from Express/Render, or localhost:3000
+// Secondary Fallback: Live Cloud Deployment on Render
+const CLOUD_API_FALLBACK = 'https://activity4-webtechnologies.onrender.com/api/projects';
+
+let activeApiUrl = (() => {
     if (window.location.protocol === 'file:') {
-        return 'https://activity4-webtechnologies.onrender.com/api/projects';
+        return CLOUD_API_FALLBACK;
     }
     if (window.location.port === '5500' || window.location.port === '5501' || window.location.port === '8080') {
         return 'http://localhost:3000/api/projects';
@@ -82,15 +83,15 @@ function setupEventListeners() {
 }
 
 // ====================================================================
-// API Calls: GET, POST, PUT, DELETE
+// API Calls: GET, POST, PUT, DELETE with Auto-Failover
 // ====================================================================
 
 /**
- * GET: Fetches all project records from the REST API
+ * GET: Fetches all project records from the REST API with automatic cloud failover
  */
 async function fetchProjects() {
     try {
-        const response = await fetch(API_BASE_URL);
+        const response = await fetch(activeApiUrl);
         if (!response.ok) {
             throw new Error(`Server returned HTTP ${response.status}`);
         }
@@ -100,12 +101,34 @@ async function fetchProjects() {
         updateMetrics();
         populateCategoryFilter();
     } catch (error) {
+        console.warn(`[API] Could not connect to ${activeApiUrl}: ${error.message}`);
+        
+        // If primary connection failed and we haven't tried cloud fallback yet, switch dynamically
+        if (activeApiUrl !== CLOUD_API_FALLBACK && !window.location.origin.includes('onrender.com')) {
+            console.log(`[API Auto-Failover] Attempting connection to Live Cloud Backend: ${CLOUD_API_FALLBACK}...`);
+            try {
+                const fallbackRes = await fetch(CLOUD_API_FALLBACK);
+                if (fallbackRes.ok) {
+                    const fallbackData = await fallbackRes.json();
+                    activeApiUrl = CLOUD_API_FALLBACK;
+                    projectsState = fallbackData.data || [];
+                    renderTable();
+                    updateMetrics();
+                    populateCategoryFilter();
+                    showToast('Connected to Live Cloud Backend (Render)', 'info');
+                    return;
+                }
+            } catch (fallbackErr) {
+                console.error('[API Auto-Failover Failed]', fallbackErr);
+            }
+        }
+
         console.error('Fetch error:', error);
         showToast(`Failed to connect to API: ${error.message}. Is backend running on port 3000?`, 'error');
         tableBody.innerHTML = `
             <tr>
                 <td colspan="8" style="text-align: center; color: var(--danger); padding: 24px;">
-                    <strong>API Connection Error:</strong> Unable to reach <code>${API_BASE_URL}</code>.<br>
+                    <strong>API Connection Error:</strong> Unable to reach <code>${activeApiUrl}</code>.<br>
                     Please start the Node.js backend: <code>cd backend && npm start</code>
                 </td>
             </tr>
@@ -141,7 +164,7 @@ async function handleFormSubmit(e) {
 
         if (isEditing && currentEditId) {
             // PUT request
-            const response = await fetch(`${API_BASE_URL}/${currentEditId}`, {
+            const response = await fetch(`${activeApiUrl}/${currentEditId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -157,7 +180,7 @@ async function handleFormSubmit(e) {
             await fetchProjects();
         } else {
             // POST request
-            const response = await fetch(API_BASE_URL, {
+            const response = await fetch(activeApiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -191,7 +214,7 @@ async function deleteProject(id, title) {
     if (!confirmation) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/${id}`, {
+        const response = await fetch(`${activeApiUrl}/${id}`, {
             method: 'DELETE'
         });
 
