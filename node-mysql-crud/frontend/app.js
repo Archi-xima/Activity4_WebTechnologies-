@@ -13,11 +13,18 @@
  */
 
 // Dynamically determine API Base URL:
-// If loaded directly from express server (http://localhost:3000), use relative path.
-// If opened via LiveServer or file://, fallback to default Express port http://localhost:3000
-const API_BASE_URL = (window.location.origin && window.location.origin.startsWith('http://localhost:3000'))
-    ? '/api/projects'
-    : 'http://localhost:3000/api/projects';
+// 1. If loaded from web / cloud (Render, Vercel) or local express (http://localhost:3000), use relative '/api/projects'
+// 2. If loaded from VS Code Live Server (port 5500/5501), fallback to localhost:3000
+// 3. If opened via file:// protocol directly from disk, seamlessly connect to the live Render cloud deployment!
+const API_BASE_URL = (() => {
+    if (window.location.protocol === 'file:') {
+        return 'https://activity4-webtechnologies.onrender.com/api/projects';
+    }
+    if (window.location.port === '5500' || window.location.port === '5501' || window.location.port === '8080') {
+        return 'http://localhost:3000/api/projects';
+    }
+    return '/api/projects';
+})();
 
 // State Management
 let projectsState = [];
